@@ -7,7 +7,6 @@ Raspberrypi data collector for Horus
 - Automatic data transfer to s3 bucket
 
 
-
 ## Installation
 Check that your Picamera is working properly by running the following command:
 ```libcamera-hello```
@@ -43,7 +42,6 @@ pip install pyyaml
 Update the config.yml and provide AWS S3 Credentials and bucket name
 
 ## Usage
-
 Run
 ```
 python3 main.py

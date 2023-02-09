@@ -24,6 +24,12 @@ file_name = cfg['image_settings']['file_name']
 photo_interval = cfg['image_settings']['photo_interval'] # Interval between photo (in seconds)
 image_folder = cfg['image_settings']['folder_name']
 
+# camera info props
+camera_name = cfg['camera_info']['camera_name']
+camera_location = cfg['camera_info']['location_name']
+camera_type = cfg['camera_info']['camera_type']
+
+
 # s3 props
 bucket = cfg['s3']['bucket_name']
 s3_folder = cfg['s3']['folder_name']
@@ -38,37 +44,36 @@ CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
 face_detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 cv2.startWindowThread()
 
+# Camera Setup
 picam2 = Picamera2()
 picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (image_width, image_height)}))
 picam2.start()
-count = 0
 
 
 def main():
+    count = 0
     while True:
         im = picam2.capture_array()
         grey = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) 
         faces = face_detector.detectMultiScale(grey, 1.3, 5)
-
-        for (x, y, w, h) in faces:
-            cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0))
         
         if len(faces) != 0:
             count += 1
-            out_path = f"/faces/face_{count}.{file_extension}"
+            out_path = f"faces/face_{count}.{file_extension}"
             cv2.imwrite(out_path, im)
-
             # Upload to S3
-            s3.meta.client.upload_file(out_path, bucket, out_path)
-
-
+            s3.meta.client.upload_file(out_path, bucket, out_path,
+                ExtraArgs={'Metadata': {'Capture_Type': 'face', 'Date': CURRENT_DATE, 'Time': CURRENT_TIME, 'Camera Location': camera_location, 'Camera Name': camera_name, 'Camera Type': camera_type}}
+            )
             # Delete local file
             os.remove(out_path)
-            
-            
 
+            for (x, y, w, h) in faces:
+                cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0))
 
         cv2.imshow("Camera", im)
+
+main()
 
     
 
