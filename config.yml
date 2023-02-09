@@ -1,6 +1,6 @@
 s3:
     bucket_name: 'bucket_name_here'
-    folder_name: 'sub-folder-in-your-bucket-here/'
+    folder_name: 'sub-folder-in-your-bucket-here'
 
 image_settings:
     horizontal_res: 640

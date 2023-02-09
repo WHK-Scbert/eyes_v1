@@ -1,11 +1,16 @@
 #!/bin/bash
 
 # Read the access key and secret access key from the text file
-read -r ACCESS_KEY_ID SECRET_ACCESS_KEY REGION < "/path/to/access-keys.txt"
+IFS=', ' read -r -a keys < "aws-access.txt"
+
+echo "Adding AWS access key: ${keys[0]}"
+echo "Adding AWS secret access key: ${keys[1]}"
+echo "Adding AWS region: ${keys[2]}"
+
 
 # Set the AWS CLI configuration
-aws configure set aws_access_key_id "$ACCESS_KEY"
-aws configure set aws_secret_access_key "$SECRET_ACCESS_KEY"
+aws configure set aws_access_key_id "${keys[0]}"
+aws configure set aws_secret_access_key "${keys[1]}"
 
 # Optional: Set the default region
-aws configure set default.region "$REGION"
+aws configure set default.region "${keys[2]}"

@@ -9,7 +9,9 @@ Raspberrypi data collector for Horus
 
 ## Installation
 Check that your Picamera is working properly by running the following command:
-```libcamera-hello```
+```
+libcamera-hello
+```
 
 Update and upgrade your Raspberry Pi by running the following commands:
 ```
@@ -39,10 +41,25 @@ Install pyyaml Library
 pip install pyyaml
 ```
 
+## Configuration
+
 Update the config.yml and provide AWS S3 Credentials and bucket name
+- The yml file will contain information that you will input yourself
+- Add the proper folder path remove the / in the end since it is already in the amazon_path variable
+
+Update the aws-access.txt file
+- Add your AWS Access Key ID, AWS Access Key Secret, and preferred region
+- Make sure to follow the format in the file
 
 ## Usage
-Run
+
+Initial Setup in commandline
+```
+chmod u+x setup.sh
+./setup.sh
+```
+
+Run file in commandline
 ```
 python3 main.py
 ```
