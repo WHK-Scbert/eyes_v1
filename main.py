@@ -5,6 +5,10 @@ from time import sleep
 import os
 import tinys3
 import yaml
+import datetime as dt
+import sys
+import subprocess
+import os
 from picamera2 import Picamera2
 
 
@@ -20,6 +24,15 @@ file_name = cfg['image_settings']['file_name']
 photo_interval = cfg['image_settings']['photo_interval'] # Interval between photo (in seconds)
 image_folder = cfg['image_settings']['folder_name']
 
+
+# s3 props
+bucket = cfg['s3']['bucket_name']
+
+BUCKET = "s3://{bucket}/"
+
+DEST = BUCKET + "sub-folder-in-your-bucket-here/"
+CURRENT_DATE = dt.datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
 
 
 # Grab images as numpy arrays and leave everything else to OpenCV.
@@ -47,13 +60,10 @@ while True:
         cv2.imwrite(out_path, im)
 
         # Upload to S3
-        conn = tinys3.Connection(cfg['s3']['access_key_id'], cfg['s3']['secret_access_key'])
-        f = open(out_path, 'rb')
-        conn.upload(out_path, f, cfg['s3']['bucket_name'],
-                headers={
-                'x-amz-meta-cache-control': 'max-age=60'
-                })
-        f.close()
+        SRC_DIR = out_path
+        CMD = "s3cmd put --acl-public %s/*.* %s" % (SRC_DIR, DEST)
+        subprocess.call(CMD, shell=True)
+
 
         # Delete local file
         os.remove(out_path)
