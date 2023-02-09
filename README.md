@@ -1,6 +1,6 @@
 # Eyes v1
  Face Detection from Raspberry Pi 4 to S3 Bucket 
- 
+
 ## Description
 Raspberrypi data collector for Horus
 - Built in facial detection 
@@ -30,9 +30,9 @@ Install OpenCV by running the following command:
 pip install opencv-python
 ```
 
-Install tinys3 Library
+Install boto3 Library
 ```
-pip install tinys3
+pip install boto3
 ```
 
 Install pyyaml Library
@@ -51,7 +51,7 @@ python3 main.py
 
 
 ## References
-- https://github.com/rob5standingby/raspberry-pi-s3-cam/blob/master/s3cam.py
 - https://github.com/calapsss/face_detection_tutorial
-- https://github.com/smore-inc/tinys3
+- https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
+- https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_file
 
