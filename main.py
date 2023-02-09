@@ -5,6 +5,7 @@ from time import sleep
 import os
 import yaml
 import datetime as dt
+import subprocess
 import boto3
 from picamera2 import Picamera2
 
@@ -20,8 +21,8 @@ with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
 # aws access props
-aws_access_key_id = cfg['s3']['aws_access_key_id']
-aws_secret_access_key = cfg['s3']['aws_secret_access_key']
+aws_access_key_id = cfg['s3']['access_key_id']
+aws_secret_access_key = cfg['s3']['secret_access_key']
 region = cfg['s3']['region']
 
 # photo props
@@ -44,9 +45,17 @@ s3_folder = cfg['s3']['folder_name']
 
 
 # Set up AWS credentials
-os.environ['aws_access_key_id'] = aws_access_key_id
-os.environ['aws_secret_access_key'] = aws_secret_access_key
-os.environ['default.region'] = region
+setRegion = f"aws configure set default.region {region}" 
+setAccessKeyID = f"aws configure set aws_access_key_id {aws_access_key_id}" 
+setAccessKeySECRET = f"aws configure set aws_secret_access_key {aws_secret_access_key}"
+process = subprocess.Popen(setRegion.split(), stdout=subprocess.PIPE)
+output, error = process.communicate()
+process = subprocess.Popen(setAccessKeyID.split(), stdout=subprocess.PIPE)
+output, error = process.communicate()
+process = subprocess.Popen(setAccessKeySECRET.split(), stdout=subprocess.PIPE)
+output, error = process.communicate()
+
+
 
 
 # Grab images as numpy arrays and leave everything else to OpenCV.
