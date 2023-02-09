@@ -58,13 +58,19 @@ def main():
         
         if len(faces) != 0:
             count += 1
-            out_path = f"faces/face_{count}.{file_extension}"
             #timestamp
+            FOLDER_DATE = dt.datetime.now().strftime('%m%d%Y')
+            FOLDER_HOUR = dt.datetime.now().strftime('%H00H') #Categorized by hour
             CURRENT_DATE = dt.datetime.now().strftime('%m/%d/%Y %H:%M:%S')
             CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
+
+            # Save image to local folder
+            out_path = f"faces/face_{count}.{file_extension}"
+            amazon_path = f"{s3_folder}/{FOLDER_DATE}/{FOLDER_HOUR}/face_{count}.{file_extension}"
+            
             cv2.imwrite(out_path, im)
             # Upload to S3
-            s3.meta.client.upload_file(out_path, bucket, out_path,
+            s3.meta.client.upload_file(out_path, bucket, amazon_path,
                 ExtraArgs={'Metadata': {'Capture_Type': 'face', 
                 'Date': CURRENT_DATE , 
                 'Time': CURRENT_TIME, 

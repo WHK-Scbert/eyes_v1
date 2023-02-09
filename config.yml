@@ -1,9 +1,6 @@
 s3:
-    access_key_id: 'your_access_key_id__here'
-    secret_access_key: 'your_secret_access_key_here'
     bucket_name: 'bucket_name_here'
     folder_name: 'sub-folder-in-your-bucket-here/'
-    region: 'us-east-1'
 
 image_settings:
     horizontal_res: 640
