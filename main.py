@@ -9,12 +9,20 @@ import boto3
 from picamera2 import Picamera2
 
 
+
+
 #configure boto3
 s3 = boto3.resource('s3')
+
 
 # testing
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
+
+# aws access props
+aws_access_key_id = cfg['s3']['aws_access_key_id']
+aws_secret_access_key = cfg['s3']['aws_secret_access_key']
+region = cfg['s3']['region']
 
 # photo props
 image_width = cfg['image_settings']['horizontal_res']
@@ -34,6 +42,11 @@ camera_type = cfg['camera_info']['camera_type']
 bucket = cfg['s3']['bucket_name']
 s3_folder = cfg['s3']['folder_name']
 
+
+# Set up AWS credentials
+os.environ['aws_access_key_id'] = aws_access_key_id
+os.environ['aws_secret_access_key'] = aws_secret_access_key
+os.environ['default.region'] = region
 
 
 # Grab images as numpy arrays and leave everything else to OpenCV.
