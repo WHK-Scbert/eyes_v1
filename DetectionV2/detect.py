@@ -87,75 +87,75 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   while True:
     if(i % 4 == 0):
         i = i+1
-    
-    image = picam2.capture_array()
-    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        image = picam2.capture_array()
+        grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    counter += 1
-    image = cv2.flip(image, 1)
+        counter += 1
+        image = cv2.flip(image, 1)
 
-    # Convert the image from BGR to RGB as required by the TFLite model.
-    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # Convert the image from BGR to RGB as required by the TFLite model.
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    # Create a TensorImage object from the RGB image.
-    input_tensor = vision.TensorImage.create_from_array(rgb_image)
+        # Create a TensorImage object from the RGB image.
+        input_tensor = vision.TensorImage.create_from_array(rgb_image)
 
-    # Run object detection estimation using the model.
-    detection_result = detector.detect(input_tensor)
-    
-    
-    filtered_detections = [
-        detection for detection in detection_result.detections
-        if any(category.category_name == "person" and category.score > 0.65 for category in detection.categories)
-    ]
-    filtered_detection_result = processor.DetectionResult(detections=filtered_detections)
-    # Draw keypoints and edges on input image
-    image = utils.visualize(image, filtered_detection_result)
-    
-    #image = utils.visualize(image, detection_result)
-    if filtered_detections:
-        picture_counter += 1
-        #timestamp
-        FOLDER_DATE = dt.datetime.now().strftime('%m%d%Y')
-        FOLDER_HOUR = dt.datetime.now().strftime('%H00H') #Categorized by hour
-        CURRENT_DATE = dt.datetime.now().strftime('%m/%d/%Y %H:%M:%S')
-        CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
-
-        # Save image to local folder
-        out_path = f"faces/face_{picture_counter}.{file_extension}"
-        amazon_path = f"{s3_folder}/{FOLDER_DATE}/{FOLDER_HOUR}/face_{picture_counter}.{file_extension}"
-
-        cv2.imwrite(out_path, image)
-        # Upload to S3
-        s3.meta.client.upload_file(out_path, bucket, amazon_path,
-            ExtraArgs={'Metadata': {'Capture_Type': 'face', 
-            'Date': CURRENT_DATE , 
-            'Time': CURRENT_TIME, 
-            'Camera_Location': camera_location, 
-            'Camera_Name': camera_name, 
-            'Camera_Type': camera_type}}
-        )
+        # Run object detection estimation using the model.
+        detection_result = detector.detect(input_tensor)
         
-        # Delete local file
-        os.remove(out_path)
         
-    
-    # Calculate the FPS
-    if counter % fps_avg_frame_count == 0:
-      end_time = time.time()
-      fps = fps_avg_frame_count / (end_time - start_time)
-      start_time = time.time()
+        filtered_detections = [
+            detection for detection in detection_result.detections
+            if any(category.category_name == "person" and category.score > 0.65 for category in detection.categories)
+        ]
+        filtered_detection_result = processor.DetectionResult(detections=filtered_detections)
+        # Draw keypoints and edges on input image
+        image = utils.visualize(image, filtered_detection_result)
+        
+        #image = utils.visualize(image, detection_result)
+        if filtered_detections:
+            picture_counter += 1
+            #timestamp
+            FOLDER_DATE = dt.datetime.now().strftime('%m%d%Y')
+            FOLDER_HOUR = dt.datetime.now().strftime('%H00H') #Categorized by hour
+            CURRENT_DATE = dt.datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+            CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
 
-    # Show the FPS
-    fps_text = 'FPS = {:.1f}'.format(fps)
-    text_location = (left_margin, row_size)
-    cv2.putText(image, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
-                font_size, text_color, font_thickness)
+            # Save image to local folder
+            out_path = f"faces/face_{picture_counter}.{file_extension}"
+            amazon_path = f"{s3_folder}/{FOLDER_DATE}/{FOLDER_HOUR}/face_{picture_counter}.{file_extension}"
 
-    # Stop the program if the ESC key is pressed.
-    if cv2.waitKey(1) == 27:
-      break
-    cv2.imshow('object_detector', image)
+            cv2.imwrite(out_path, image)
+            # Upload to S3
+            s3.meta.client.upload_file(out_path, bucket, amazon_path,
+                ExtraArgs={'Metadata': {'Capture_Type': 'face', 
+                'Date': CURRENT_DATE , 
+                'Time': CURRENT_TIME, 
+                'Camera_Location': camera_location, 
+                'Camera_Name': camera_name, 
+                'Camera_Type': camera_type}}
+            )
+            
+            # Delete local file
+            os.remove(out_path)
+            
+        
+        # Calculate the FPS
+        if counter % fps_avg_frame_count == 0:
+            end_time = time.time()
+            fps = fps_avg_frame_count / (end_time - start_time)
+            start_time = time.time()
+
+        # Show the FPS
+        fps_text = 'FPS = {:.1f}'.format(fps)
+        text_location = (left_margin, row_size)
+        cv2.putText(image, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+                    font_size, text_color, font_thickness)
+
+        # Stop the program if the ESC key is pressed.
+        if cv2.waitKey(1) == 27:
+            break
+        cv2.imshow('object_detector', image)
 
   cap.release()
   cv2.destroyAllWindows()
