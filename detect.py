@@ -15,10 +15,8 @@
 import argparse
 import sys
 import time
-import yaml
+
 import cv2
-from datetime import datetime
-import datetime as dt
 from tflite_support.task import core
 from tflite_support.task import processor
 from tflite_support.task import vision
@@ -26,41 +24,32 @@ import utils
 from picamera2 import Picamera2
 import numpy as np
 import boto3
-import os
 
 
 def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
         enable_edgetpu: bool) -> None:
+  """Continuously run inference on images acquired from the camera.
+
+  Args:
+    model: Name of the TFLite object detection model.
+    camera_id: The camera id to be passed to OpenCV.
+    width: The width of the frame captured from the camera.
+    height: The height of the frame captured from the camera.
+    num_threads: The number of CPU threads to run the model.
+    enable_edgetpu: True/False whether the model is a EdgeTPU model.
+  """
   #configure boto3
   s3 = boto3.resource('s3')
-  # testing
-  with open("config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
-
-  # photo props
-  image_width = cfg['image_settings']['horizontal_res']
-  image_height = cfg['image_settings']['vertical_res']
-  file_extension = cfg['image_settings']['file_extension']
-  file_name = cfg['image_settings']['file_name']
-  photo_interval = cfg['image_settings']['photo_interval'] # Interval between photo (in seconds)
-  image_folder = cfg['image_settings']['folder_name']
-
-  # camera info props
-  camera_name = cfg['camera_info']['camera_name']
-  camera_location = cfg['camera_info']['location_name']
-  camera_type = cfg['camera_info']['camera_type']
-  # s3 props
-  bucket = cfg['s3']['bucket_name']
-  s3_folder = cfg['s3']['folder_name']
-  
-  # Save image to local folder
-  # Continuously capture images from the camera and run inference
-  picture_counter = 0
-
   # Variables to calculate FPS
   counter, fps = 0, 0
   start_time = time.time()
-  #Video input
+
+  # Start capturing video input from the camera
+#   cap = cv2.VideoCapture(camera_id)
+#   cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+#   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+  #with picamera.PiCamera() as camera:
+      #camera.resolution = (width, height)
   picam2 = Picamera2()
   picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (width, height)}))
   picam2.start()
@@ -82,7 +71,11 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
       base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
 
-  
+  # Continuously capture images from the camera and run inference
+  picture_counter = 0
+  #stream = io.BytesIO()
+  #while cap.isOpened():
+  #for _ in camera.capture_continuous(stream, format='jpeg', use_video_port=true):
   i = 0
   while True:
     if(i % 4 == 0):
@@ -90,6 +83,15 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     
     image = picam2.capture_array()
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#stream.seek(0)
+    #image = np.array(Image.open(stream))
+    
+    
+    #success, image = cap.read()
+    #if not success:
+      #sys.exit(
+       #   'ERROR: Unable to read from webcam. Please verify your webcam settings.'
+      #)
 
     counter += 1
     image = cv2.flip(image, 1)
@@ -115,29 +117,8 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     #image = utils.visualize(image, detection_result)
     if filtered_detections:
         picture_counter += 1
-        #timestamp
-        FOLDER_DATE = dt.datetime.now().strftime('%m%d%Y')
-        FOLDER_HOUR = dt.datetime.now().strftime('%H00H') #Categorized by hour
-        CURRENT_DATE = dt.datetime.now().strftime('%m/%d/%Y %H:%M:%S')
-        CURRENT_TIME = dt.datetime.now().strftime('%m%d%Y%H%M%S')
-
-        # Save image to local folder
-        out_path = f"faces/face_{picture_counter}.{file_extension}"
-        amazon_path = f"{s3_folder}/{FOLDER_DATE}/{FOLDER_HOUR}/face_{picture_counter}.{file_extension}"
-
-        cv2.imwrite(out_path, image)
-        # Upload to S3
-        s3.meta.client.upload_file(out_path, bucket, amazon_path,
-            ExtraArgs={'Metadata': {'Capture_Type': 'face', 
-            'Date': CURRENT_DATE , 
-            'Time': CURRENT_TIME, 
-            'Camera_Location': camera_location, 
-            'Camera_Name': camera_name, 
-            'Camera_Type': camera_type}}
-        )
-        
-        # Delete local file
-        os.remove(out_path)
+        cv2.imwrite("pictures/person_detected_{}.jpg".format(picture_counter), image)
+   
         
     
     # Calculate the FPS
