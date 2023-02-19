@@ -1,10 +1,15 @@
+## Requirement Raspberri Pi Bullseyes
 After cloning
 ```
 cd eyes_v1/DetectionV2
 ```
 ```
 pip3 install -r requirement.txt
+pip3 install boto3
+pip3 install pyyaml
 ```
+
+
 
 
 ## Set up your hardware
