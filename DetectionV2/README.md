@@ -1,6 +1,6 @@
 After cloning
 ```
-cd /eyes_v1/DetectionV2
+cd eyes_v1/DetectionV2
 ```
 ```
 pip3 install -r requirement.txt
