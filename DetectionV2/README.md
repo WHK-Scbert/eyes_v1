@@ -1,12 +1,11 @@
-# TensorFlow Lite Python object detection example with Raspberry Pi
+After cloning
+```
+cd /eyes_v1/DetectionV2
+```
+```
+pip3 install -r requirement.txt
+```
 
-This example uses [TensorFlow Lite](https://tensorflow.org/lite) with Python on
-a Raspberry Pi to perform real-time object detection using images streamed from
-the Pi Camera. It draws a bounding box around each detected object in the camera
-preview (when the object score is above a given threshold).
-
-At the end of this page, there are extra steps to accelerate the example using
-the Coral USB Accelerator to increase inference speed.
 
 ## Set up your hardware
 
