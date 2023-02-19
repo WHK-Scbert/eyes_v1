@@ -35,7 +35,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   s3 = boto3.resource('s3')
   # testing
   with open("config.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
+    cfg = yaml.safe_load(ymlfile)
 
   # photo props
   image_width = cfg['image_settings']['horizontal_res']
